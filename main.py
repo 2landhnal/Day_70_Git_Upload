@@ -102,7 +102,7 @@ def register():
             return redirect(url_for('login'))
     return render_template("register.html", form=form)
 
-
+is_edit = False
 @app.route('/login', methods=["POST", "GET"])
 def login():
     form = LoginForm()
@@ -178,6 +178,7 @@ def add_new_post():
 @app.route("/edit-post/<int:post_id>", methods=["POST", "GET"])
 @admin_only
 def edit_post(post_id):
+    global is_edit
     post = BlogPost.query.get(post_id)
     edit_form = CreatePostForm(
         title=post.title,
@@ -187,6 +188,7 @@ def edit_post(post_id):
         body=post.body
     )
     if edit_form.validate_on_submit():
+        is_edit = False
         post.title = edit_form.title.data
         post.subtitle = edit_form.subtitle.data
         post.img_url = edit_form.img_url.data
@@ -194,7 +196,7 @@ def edit_post(post_id):
         db.session.commit()
         return redirect(url_for("show_post", post_id=post.id))
 
-    return render_template("make-post.html", form=edit_form, current_user=current_user)
+    return render_template("make-post.html", form=edit_form, current_user=current_user, is_edit=True)
 
 @app.route("/delete/<int:post_id>")
 @admin_only
